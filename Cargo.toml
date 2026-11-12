@@ -1,0 +1,12 @@
+[package]
+name = "elden_32"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serialport = "4.10.1"
+tokio-serial = "5.5.0"
+
+[[bin]]
+name = "elden_32"
+path = "main.rs"
