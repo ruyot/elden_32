@@ -23,43 +23,125 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
         if count <= 40 {
             // Saving the message thats stored in memory in the serial port
             let content = &buffer[..count];
-
             
-            // The third last element is hold or release
+            // The third last element is the number indicating whether the input is a hold or a release
+            let hold_or_release_i = count - 3;           
+            
+            // checking whether or not theres a semi colon allows us to differentiate the input from home (which is 5) or the other 7 buttons which are 1:0, 2:1, 2:0 etc
+            let semi_i = count - 4;
+
+            // The fifth last element is the number indicating what button the input message is from
+            let button_i = count - 5;
+
+            let hold_or_release = content[hold_or_release_i];
+            let semi = content[semi_i];
+            let button = content[button_i];
+
+            if semi != 58 {
+                // HOME was contacted
+                
+                println!("Home")
+
+            } else if button == 49 {
+                    // W/UP was contacted 
+                    // Check if it was a release or hold
+  
+                    if hold_or_release == 48 {
+                        // Controller hold forward
+                        println!("W hold")
+                    } else {
+                        // Controller release forward
+                        println!("W release")
+                    }
+
+            } else if button == 50 {
+                    // A/LEFT was contacted
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold left
+                        println!("A hold")
+                    } else {
+                        // Controller release left
+                        println!("A release")
+                    }
+
+            } else if button == 51 {
+                    // S/DOWN was contacted 
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold down
+                        println!("S hold")
+                    } else {
+                        // Controller release down
+                        println!("S release")
+                    }
+
+            } else if button == 52 {
+                    // D/RIGHT was contacted
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold right
+                        println!("D hold")
+                    } else {
+                        // Controller release right
+                        println!("D release")
+                    }
+
+            } else if button == 54 {
+                    // START was contacted
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold start? (gonna figure out what this should do later)
+                        println!("Start hold")
+                    } else {
+                        // Controller release start
+                        println!("Start release")
+                    }
+            
+            } else if button == 55 {
+                    // A was contacted
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold A
+                        println!("A hold")
+                    } else {
+                        // Controller release A
+                        println!("A release")
+                    }
+
+            } else if button == 56 {
+                    // B was contacted
+                    // Controller hold B 
+
+                    if hold_or_release == 48 {
+                        // Controller hold B
+                        println!("B hold")
+                    } else {
+                        // Controller release B
+                        println!("B release")
+                    }
+
+            }
+        } 
+        // will consider another branch for combination inputs (two buttons at once) later if determined necessary
+        
             // the fifth last element is the numeric value of the button e.g up is 1
             // first goal should be to pull out and compare the fifth element from the end to see what input it matches
             // within that you should see if its hold or release 
             // based on that u make a call to the xbox virtual controller which will execute the in game control 
-        }
 
-
+        /*
         if count > 0 {
             println!("The bytes: {:?}", &buffer[..count]);
             println!("length {}", count)
         }
-
-    }
-// [73, 32, 40, 57, 53, 49, 52, 55, 50, 49, 41, 32, 108, 117, 97, 58, 32, 91, 99, 111, 110, 116, 114, 111, 108, 108, 101, 114, 93, 32, 50, 58, 49, 13, 10]
-// [73, 32, 40, 49, 54, 54, 56, 57, 50, 56, 49, 41, 32, 108, 117, 97, 58, 32, 91, 99, 111, 110, 116, 114, 111, 108, 108, 101, 114, 93, 32, 50, 58, 49, 13, 10]
-    /*
-    match read {
-        Ok(msg) {
-            // need to destructure the msg here 
-            // then need to match it against all of its possible combinations that we established earlier
-            // so 1:0, 1:1, 2:0, 2:1, 3:0, 3:1, 4:0, 4:1, 5, 6:0, 6:1, 7:0, 7:1, 8:0, 8:1
-            match msg {
-
-            }
-
-
-
-
-        }
-        Err(_) {
-            return("Found no data when reading")
-        }
+        */
     };
-    */
 }
 
 /*
@@ -68,6 +150,8 @@ Will at most usually only have two buttons being pressed at the same time at max
 
 So we could then make it so that we check at most a size of 70 and if the size is greater than 70 say 3 or 4 button presses at once we ignore
 or actually ig we would just ignore by default and the smashes shouldnt do anything depending on how the code is written
+
+length also increases as time elapsed increases since the array has a timestamp embedded within it which is why the buffer size is larger than just 70 to account for fluctuation
 
 the last byte is line feed LF and the second last is carriage return CR the input number combination is the 3 bytes after (or 1 byte after if its the home button)
 */
