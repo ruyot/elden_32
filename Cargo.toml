@@ -7,6 +7,7 @@ edition = "2024"
 serialport = "4.10.1"
 tokio = {version = "1.54.1", features = ["full"]}
 tokio-serial = "5.5.0"
+winput = "0.2.5"
 
 [[bin]]
 name = "elden_32"
