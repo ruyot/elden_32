@@ -1,5 +1,6 @@
 use tokio_serial::SerialPortBuilderExt;
 use std::error::Error;
+use winput::{Button, Vk, Input, Action};
 
 pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
@@ -40,7 +41,9 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
             if semi != 58 {
                 // HOME was contacted
                 
-                println!("Home")
+                println!("Q");
+                let input = Input::from_vk(Vk::Q, Action::Press);
+                winput::send_inputs(&[input]);
 
             } else if button == 49 {
                     // W/UP was contacted 
@@ -48,10 +51,14 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
   
                     if hold_or_release == 48 {
                         // Controller hold forward
-                        println!("W hold")
+                        println!("W hold");
+                        let input = Input::from_vk(Vk::W, Action::Press);
+                        winput::send_inputs(&[input]);
                     } else {
                         // Controller release forward
-                        println!("W release")
+                        println!("W release");
+                        let input = Input::from_vk(Vk::W, Action::Release);
+                        winput::send_inputs(&[input]);
                     }
 
             } else if button == 50 {
@@ -60,10 +67,14 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
                     if hold_or_release == 48 {
                         // Controller hold left
-                        println!("A hold")
+                        println!("A hold");
+                        let input = Input::from_vk(Vk::A, Action::Press);
+                        winput::send_inputs(&[input]);
                     } else {
                         // Controller release left
-                        println!("A release")
+                        println!("A release");
+                        let input = Input::from_vk(Vk::A, Action::Release);
+                        winput::send_inputs(&[input]);
                     }
 
             } else if button == 51 {
@@ -72,10 +83,14 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
                     if hold_or_release == 48 {
                         // Controller hold down
-                        println!("S hold")
+                        println!("S hold");
+                        let input = Input::from_vk(Vk::S, Action::Press);
+                        winput::send_inputs(&[input]);
                     } else {
                         // Controller release down
-                        println!("S release")
+                        println!("S release");
+                        let input = Input::from_vk(Vk::S, Action::Release);
+                        winput::send_inputs(&[input]);
                     }
 
             } else if button == 52 {
@@ -84,10 +99,14 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
                     if hold_or_release == 48 {
                         // Controller hold right
-                        println!("D hold")
+                        println!("D hold");
+                        let input = Input::from_vk(Vk::D, Action::Press);
+                        winput::send_inputs(&[input]);
                     } else {
                         // Controller release right
-                        println!("D release")
+                        println!("D release");
+                        let input = Input::from_vk(Vk::D, Action::Release);
+                        winput::send_inputs(&[input]);
                     }
 
             } else if button == 54 {
@@ -96,51 +115,50 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
                     if hold_or_release == 48 {
                         // Controller hold start? (gonna figure out what this should do later)
-                        println!("Start hold")
+                        println!("Start hold");
+                        let input = Input::from_vk(Vk::Escape, Action::Press);
+                        winput::send_inputs(&[input]);
                     } else {
                         // Controller release start
-                        println!("Start release")
+                        println!("Start release");
+                        let input = Input::from_vk(Vk::Escape, Action::Release);
+                        winput::send_inputs(&[input]);
                     }
             
             } else if button == 55 {
+                    // B was contacted
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold B
+                        println!("Spacebar hold");
+                        let input = Input::from_vk(Vk::Space, Action::Press);
+                        winput::send_inputs(&[input]);
+                    } else {
+                        // Controller release B
+                        println!("Spacebar release");
+                        let input = Input::from_vk(Vk::Space, Action::Release);
+                        winput::send_inputs(&[input]);
+                    }
+
+            } else if button == 56 {
                     // A was contacted
                     // Check if it was a release or hold
 
                     if hold_or_release == 48 {
                         // Controller hold A
-                        println!("A hold")
+                        println!("Mouse left click hold");
+                        let input = Input::from_button(Button::Left, Action::Press);
+                        winput::send_inputs(&[input]);
                     } else {
                         // Controller release A
-                        println!("A release")
+                        println!("Mouse left click release");
+                        let input = Input::from_button(Button::Left, Action::Release);
+                        winput::send_inputs(&[input]);
                     }
-
-            } else if button == 56 {
-                    // B was contacted
-                    // Controller hold B 
-
-                    if hold_or_release == 48 {
-                        // Controller hold B
-                        println!("B hold")
-                    } else {
-                        // Controller release B
-                        println!("B release")
-                    }
-
             }
         } 
         // will consider another branch for combination inputs (two buttons at once) later if determined necessary
-        
-            // the fifth last element is the numeric value of the button e.g up is 1
-            // first goal should be to pull out and compare the fifth element from the end to see what input it matches
-            // within that you should see if its hold or release 
-            // based on that u make a call to the xbox virtual controller which will execute the in game control 
-
-        /*
-        if count > 0 {
-            println!("The bytes: {:?}", &buffer[..count]);
-            println!("length {}", count)
-        }
-        */
     };
 }
 
