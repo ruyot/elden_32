@@ -1,7 +1,7 @@
 use tokio_serial::SerialPortBuilderExt;
-use std::{error::Error, mem};
-use winput::{Action, Button, Input, Vk, send_inputs};
-use winapi::um::winuser::{self, INPUT, INPUT_KEYBOARD, KEYBDINPUT, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE};
+use std::{error::Error};
+use winput::{Action, Button, Input};
+use winapi::um::winuser::{self, INPUT, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE};
 
 use crate::input::input_helper;
 
@@ -23,16 +23,8 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
         // if the length is less than 40 assume that its a single button press
         // 40 is good cause it takes into consideration time as well
         // since time makes it start at 33 and then increase incrementally 
-        
-        // Instantiating and changing the fields in the KEYBDINPUT struct directly in order to send scancodes instead of virtual keyboard inputs
-        // let mut kb_input_struct = winapi::um::winuser::KEYBDINPUT{
-        //    wVk: 0,
-        //    wScan: 0,
-        //    dwFlags: 0,
-        //    time: 0,
-        //    dwExtraInfo: 0,
-        // };sdwasdwdwas
-        
+
+        /*
         let mut input_union : winuser::INPUT_u = unsafe { mem::zeroed() };
         let inner_input_union = unsafe { input_union.ki_mut() };
 
@@ -49,7 +41,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                 type_ : INPUT_KEYBOARD,
                 u: input_union,
         }; 1];
-        
+        */
 
         if count <= 40 {
             // Saving the message thats stored in memory in the serial port
@@ -93,14 +85,26 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                     if hold_or_release == 48 {
                         // Controller hold forward
                         println!("W hold");
-                        let input = Input::from_vk(Vk::W, Action::Press);
-                        winput::send_inputs(&[input]);
+                        let scancode = 0x11;
+                        let flags = KEYEVENTF_SCANCODE; // we want a scancode and the key to be down
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     } else {
                         // Controller release forward
                         println!("W release");
-                        let input = Input::from_vk(Vk::W, Action::Release);
-                        winput::send_inputs(&[input]);
-                    }
+                        let scancode = 0x11;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP; // we want a scancode and the key to release
+                        
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    }     
 
             } else if button == 50 {
                     // A/LEFT was contacted
@@ -109,13 +113,25 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                     if hold_or_release == 48 {
                         // Controller hold left
                         println!("A hold");
-                        let input = Input::from_vk(Vk::A, Action::Press);
-                        winput::send_inputs(&[input]);
+                        let scancode = 0x1E;
+                        let flags = KEYEVENTF_SCANCODE;
+
+                        let mut input = input_helper(scancode, flags);
+                        
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     } else {
                         // Controller release left
                         println!("A release");
-                        let input = Input::from_vk(Vk::A, Action::Release);
-                        winput::send_inputs(&[input]);
+                        let scancode = 0x1E;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     }
 
             } else if button == 51 {
@@ -125,13 +141,25 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                     if hold_or_release == 48 {
                         // Controller hold down
                         println!("S hold");
-                        let input = Input::from_vk(Vk::S, Action::Press);
-                        winput::send_inputs(&[input]);
+                        let scancode = 0x1F;
+                        let flags = KEYEVENTF_SCANCODE;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     } else {
                         // Controller release down
                         println!("S release");
-                        let input = Input::from_vk(Vk::S, Action::Release);
-                        winput::send_inputs(&[input]);
+                        let scancode = 0x1F;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                        let mut input = input_helper(scancode, flags);
+                        
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     }
 
             } else if button == 52 {
@@ -141,13 +169,25 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                     if hold_or_release == 48 {
                         // Controller hold right
                         println!("D hold");
-                        let input = Input::from_vk(Vk::D, Action::Press);
-                        winput::send_inputs(&[input]);
+                        let scancode = 0x20;
+                        let flags = KEYEVENTF_SCANCODE;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     } else {
                         // Controller release right
                         println!("D release");
-                        let input = Input::from_vk(Vk::D, Action::Release);
-                        winput::send_inputs(&[input]);
+                        let scancode = 0x20;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     }
 
             } else if button == 54 {
@@ -155,15 +195,27 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                     // Check if it was a release or hold
 
                     if hold_or_release == 48 {
-                        // Controller hold start? (gonna figure out what this should do later)
+                        // Controller hold start (probably can be e)
                         println!("Start hold");
-                        let input = Input::from_vk(Vk::Escape, Action::Press);
-                        winput::send_inputs(&[input]);
+                        let scancode = 0x12;
+                        let flags = KEYEVENTF_SCANCODE;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     } else {
                         // Controller release start
                         println!("Start release");
-                        let input = Input::from_vk(Vk::Escape, Action::Release);
-                        winput::send_inputs(&[input]);
+                        let scancode = 0x12;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     }
             
             } else if button == 55 {
@@ -173,13 +225,25 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                     if hold_or_release == 48 {
                         // Controller hold B
                         println!("Spacebar hold");
-                        let input = Input::from_vk(Vk::Space, Action::Press);
-                        winput::send_inputs(&[input]);
+                        let scancode = 0x39;
+                        let flags = KEYEVENTF_SCANCODE;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     } else {
                         // Controller release B
                         println!("Spacebar release");
-                        let input = Input::from_vk(Vk::Space, Action::Release);
-                        winput::send_inputs(&[input]);
+                        let scancode = 0x39;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                        let mut input = input_helper(scancode, flags);
+                        
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     }
 
             } else if button == 56 {
