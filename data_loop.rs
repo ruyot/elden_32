@@ -168,9 +168,9 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                     // Check if it was a release or hold
 
                     if hold_or_release == 48 {
-                        // Controller hold start (Q)
-                        println!("Start hold (Q)");
-                        let scancode = 0x10;
+                        // Controller hold start (R)
+                        println!("Start hold (R)");
+                        let scancode = 0x13;
                         let flags = KEYEVENTF_SCANCODE;
 
                         let mut input = input_helper(scancode, flags);
@@ -179,9 +179,9 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                             winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
                         }
                     } else {
-                        // Controller release start (Q)
-                        println!("Start release (Q)");
-                        let scancode = 0x10;
+                        // Controller release start (R)
+                        println!("Start release (R)");
+                        let scancode = 0x13;
                         let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
 
                         let mut input = input_helper(scancode, flags);
@@ -366,7 +366,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                             winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
                         }
                     } else {
-                        // Controller release start (Q)
+                        // Controller release start (M)
                         println!("Start release (M)");
                         let scancode = 0x32;
                         let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
@@ -384,8 +384,8 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
                     if hold_or_release == 48 {
                         // Controller hold B
-                        println!("R Hold");
-                        let scancode = 0x13;
+                        println!("Q Hold");
+                        let scancode = 0x10;
                         let flags = KEYEVENTF_SCANCODE;
 
                         let mut input = input_helper(scancode, flags);
@@ -395,8 +395,8 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                         }
                     } else {
                         // Controller release B
-                        println!("R Release");
-                        let scancode = 0x13;
+                        println!("Q Release");
+                        let scancode = 0x10;
                         let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
 
                         let mut input = input_helper(scancode, flags);
