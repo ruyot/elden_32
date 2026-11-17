@@ -1,6 +1,9 @@
 use tokio_serial::SerialPortBuilderExt;
-use std::error::Error;
-use winput::{Button, Vk, Input, Action};
+use std::{error::Error, mem};
+use winput::{Action, Button, Input, Vk, send_inputs};
+use winapi::um::winuser::{self, INPUT, INPUT_KEYBOARD, KEYBDINPUT, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE};
+
+use crate::input::input_helper;
 
 pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
@@ -20,6 +23,33 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
         // if the length is less than 40 assume that its a single button press
         // 40 is good cause it takes into consideration time as well
         // since time makes it start at 33 and then increase incrementally 
+        
+        // Instantiating and changing the fields in the KEYBDINPUT struct directly in order to send scancodes instead of virtual keyboard inputs
+        // let mut kb_input_struct = winapi::um::winuser::KEYBDINPUT{
+        //    wVk: 0,
+        //    wScan: 0,
+        //    dwFlags: 0,
+        //    time: 0,
+        //    dwExtraInfo: 0,
+        // };sdwasdwdwas
+        
+        let mut input_union : winuser::INPUT_u = unsafe { mem::zeroed() };
+        let inner_input_union = unsafe { input_union.ki_mut() };
+
+        *inner_input_union = KEYBDINPUT {
+            wVk: 0,
+            wScan: 0x10,
+            dwFlags: KEYEVENTF_SCANCODE,
+            time: 0,
+            dwExtraInfo: 0,
+        };
+
+        let mut input = 
+            [INPUT {
+                type_ : INPUT_KEYBOARD,
+                u: input_union,
+        }; 1];
+        
 
         if count <= 40 {
             // Saving the message thats stored in memory in the serial port
@@ -37,13 +67,24 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
             let hold_or_release = content[hold_or_release_i];
             let semi = content[semi_i];
             let button = content[button_i];
-
+            
             if semi != 58 {
                 // HOME was contacted
-                
+    
                 println!("Q");
-                let input = Input::from_vk(Vk::Q, Action::Press);
-                winput::send_inputs(&[input]);
+                // inner_input_union.dwFlags += KEYEVENTF_KEYUP;
+                // inner_input_union.wScan = 0x11;
+
+                let scancode= 0x10; 
+                let flags= KEYEVENTF_SCANCODE;
+
+                let mut input = input_helper(scancode, flags);
+
+                unsafe {
+                    winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                }
+                // let input = Input::from_char('Q', Action::Press).unwrap();
+                // winput::send_inputs(&[input]);
 
             } else if button == 49 {
                     // W/UP was contacted 
