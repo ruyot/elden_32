@@ -1,7 +1,7 @@
 use tokio_serial::SerialPortBuilderExt;
 use std::{error::Error};
 use winput::{Action, Button, Input};
-use winapi::um::winuser::{self, INPUT, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE};
+use winapi::{shared::basetsd::INT32, um::winuser::{self, INPUT, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE}};
 
 use crate::input::input_helper;
 
@@ -13,72 +13,45 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
     // might need to increase depending on results
     let mut buffer  = [0; 76];
+
+    // Boolean flag for changing configurations from "attacking" to "exploring" 
+    let mut is_home = false;
     
     // Continuous loop where we read from the serial port that the esp32 is connected to and monitor incoming messages
     loop {
-       let count = tokio::io::AsyncReadExt::read(&mut port, &mut buffer).await?;
+        let count = tokio::io::AsyncReadExt::read(&mut port, &mut buffer).await?;
+
+        // Saving the message thats stored in memory in the serial port
+        let content = &buffer[..count];
+            
+        // The third last element is the number indicating whether the input is a hold or a release
+        let hold_or_release_i = count - 3;           
+            
+        // checking whether or not theres a semi colon allows us to differentiate the input from home (which is 5) or the other 7 buttons which are 1:0, 2:1, 2:0 etc
+        let semi_i = count - 4;
+
+        // The fifth last element is the number indicating what button the input message is from
+        let button_i = count - 5;
+
+        let hold_or_release = content[hold_or_release_i];
+        let semi = content[semi_i];    
+        let button = content[button_i];
         
-        // use 40 bytes as the middle ground seperator 
-        // if the length is greater than 40 assume that its a combination of two buttons simultaneously 
-        // if the length is less than 40 assume that its a single button press
-        // 40 is good cause it takes into consideration time as well
-        // since time makes it start at 33 and then increase incrementally 
+        if semi != 58 {
+            // HOME was contacted
+            println!("user pressed home");
+            if is_home == false {
+                is_home = true;
+                println!("Switched to configuration 2 (Exploring)")
+            } else {
+                is_home = false;
+                println!("Switched to configuration 1 (Attacking)")
+            }
+        }
 
-        /*
-        let mut input_union : winuser::INPUT_u = unsafe { mem::zeroed() };
-        let inner_input_union = unsafe { input_union.ki_mut() };
-
-        *inner_input_union = KEYBDINPUT {
-            wVk: 0,
-            wScan: 0x10,
-            dwFlags: KEYEVENTF_SCANCODE,
-            time: 0,
-            dwExtraInfo: 0,
-        };
-
-        let mut input = 
-            [INPUT {
-                type_ : INPUT_KEYBOARD,
-                u: input_union,
-        }; 1];
-        */
-
-        if count <= 40 {
-            // Saving the message thats stored in memory in the serial port
-            let content = &buffer[..count];
-            
-            // The third last element is the number indicating whether the input is a hold or a release
-            let hold_or_release_i = count - 3;           
-            
-            // checking whether or not theres a semi colon allows us to differentiate the input from home (which is 5) or the other 7 buttons which are 1:0, 2:1, 2:0 etc
-            let semi_i = count - 4;
-
-            // The fifth last element is the number indicating what button the input message is from
-            let button_i = count - 5;
-
-            let hold_or_release = content[hold_or_release_i];
-            let semi = content[semi_i];
-            let button = content[button_i];
-            
-            if semi != 58 {
-                // HOME was contacted
-    
-                println!("Q");
-                // inner_input_union.dwFlags += KEYEVENTF_KEYUP;
-                // inner_input_union.wScan = 0x11;
-
-                let scancode= 0x10; 
-                let flags= KEYEVENTF_SCANCODE;
-
-                let mut input = input_helper(scancode, flags);
-
-                unsafe {
-                    winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
-                }
-                // let input = Input::from_char('Q', Action::Press).unwrap();
-                // winput::send_inputs(&[input]);
-
-            } else if button == 49 {
+        // If its a single button press and were on config 1 "attacking" proceed with everything related to config 1
+        if count <= 40 && is_home == false { 
+            if button == 49 {
                     // W/UP was contacted 
                     // Check if it was a release or hold
   
@@ -263,6 +236,11 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                     }
             }
         } 
+        // If its a single button press and were on config 2 "exploring" proceed with everything related to config 2
+        else if count <= 40 && is_home == true {
+            // for now just print something
+            println!("were on config 2!");
+        }
         // will consider another branch for combination inputs (two buttons at once) later if determined necessary
     };
 }
