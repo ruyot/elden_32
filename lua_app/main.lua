@@ -44,10 +44,12 @@ function on_button(button, kind)
       badge.sys.log("4:1")
     end
 
-  -- user pressed HOME (triggers on release)
-  elseif button == contact.HOME then 
-    badge.sys.log("5")
-
+  -- user pressed HOME
+  elseif button == contact.HOME then
+    if kind == contact_kind.PRESSED then
+      badge.sys.log("5")
+    else
+    end
   -- user pressed START
   elseif button == contact.START then
     if kind == contact_kind.PRESSED then
