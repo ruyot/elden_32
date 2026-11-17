@@ -1,7 +1,7 @@
 use tokio_serial::SerialPortBuilderExt;
 use std::{error::Error};
 use winput::{Action, Button, Input};
-use winapi::{um::winuser::{self, INPUT, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE}};
+use winapi::um::winuser::{self, INPUT, KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE};
 
 use crate::input::input_helper;
 
@@ -246,7 +246,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                         // Controller hold forward
                         println!("Arrow Key Up Hold");
                         let scancode = 0xE048;
-                        let flags = KEYEVENTF_SCANCODE; // we want a scancode and the key to be down
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_EXTENDEDKEY; // we want a scancode and the key to be down
 
                         let mut input = input_helper(scancode, flags);
 
@@ -257,7 +257,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                         // Controller release forward
                         println!("Arrow Key Up Release");
                         let scancode = 0xE048;
-                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP; // we want a scancode and the key to release
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP | KEYEVENTF_EXTENDEDKEY; // we want a scancode and the key to release
                         
                         let mut input = input_helper(scancode, flags);
 
@@ -274,7 +274,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                         // Controller hold left
                         println!("Arrow Key Left Hold");
                         let scancode = 0xE04B;
-                        let flags = KEYEVENTF_SCANCODE;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_EXTENDEDKEY;
 
                         let mut input = input_helper(scancode, flags);
                         
@@ -285,7 +285,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                         // Controller release left
                         println!("Arrow Key Left Release");
                         let scancode = 0xE04B;
-                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP | KEYEVENTF_EXTENDEDKEY;
 
                         let mut input = input_helper(scancode, flags);
 
@@ -302,7 +302,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                         // Controller hold down
                         println!("Arrow Key Down Hold");
                         let scancode = 0xE050;
-                        let flags = KEYEVENTF_SCANCODE;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_EXTENDEDKEY;
 
                         let mut input = input_helper(scancode, flags);
 
@@ -313,7 +313,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                         // Controller release down
                         println!("Arrow Key Down Release");
                         let scancode = 0xE050;
-                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP | KEYEVENTF_EXTENDEDKEY;
 
                         let mut input = input_helper(scancode, flags);
                         
@@ -330,7 +330,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                         // Controller hold right
                         println!("Arrow Key Right Hold");
                         let scancode = 0xE04D;
-                        let flags = KEYEVENTF_SCANCODE;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_EXTENDEDKEY;
 
                         let mut input = input_helper(scancode, flags);
 
@@ -341,7 +341,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                         // Controller release right
                         println!("Arrow Key Right Release");
                         let scancode = 0xE04D;
-                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP | KEYEVENTF_EXTENDEDKEY;
 
                         let mut input = input_helper(scancode, flags);
 
