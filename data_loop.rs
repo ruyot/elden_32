@@ -39,7 +39,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
         
         if semi != 58 {
             // HOME was contacted
-            println!("user pressed home");
+
             if is_home == false {
                 is_home = true;
                 println!("Switched to configuration 2 (Exploring)")
@@ -169,7 +169,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
                     if hold_or_release == 48 {
                         // Controller hold start (Q)
-                        println!("Start hold");
+                        println!("Start hold (Q)");
                         let scancode = 0x10;
                         let flags = KEYEVENTF_SCANCODE;
 
@@ -180,7 +180,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                         }
                     } else {
                         // Controller release start (Q)
-                        println!("Start release");
+                        println!("Start release (Q)");
                         let scancode = 0x10;
                         let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
 
@@ -238,8 +238,202 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
         } 
         // If its a single button press and were on config 2 "exploring" proceed with everything related to config 2
         else if count <= 40 && is_home == true {
-            // for now just print something
-            println!("were on config 2!");
+            if button == 49 {
+                    // W/UP was contacted 
+                    // Check if it was a release or hold
+  
+                    if hold_or_release == 48 {
+                        // Controller hold forward
+                        println!("Arrow Key Up Hold");
+                        let scancode = 0xE048;
+                        let flags = KEYEVENTF_SCANCODE; // we want a scancode and the key to be down
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    } else {
+                        // Controller release forward
+                        println!("Arrow Key Up Release");
+                        let scancode = 0xE048;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP; // we want a scancode and the key to release
+                        
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    }     
+
+            } else if button == 50 {
+                    // A/LEFT was contacted
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold left
+                        println!("Arrow Key Left Hold");
+                        let scancode = 0xE04B;
+                        let flags = KEYEVENTF_SCANCODE;
+
+                        let mut input = input_helper(scancode, flags);
+                        
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    } else {
+                        // Controller release left
+                        println!("Arrow Key Left Release");
+                        let scancode = 0xE04B;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    }
+
+            } else if button == 51 {
+                    // S/DOWN was contacted 
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold down
+                        println!("Arrow Key Down Hold");
+                        let scancode = 0xE050;
+                        let flags = KEYEVENTF_SCANCODE;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    } else {
+                        // Controller release down
+                        println!("Arrow Key Down Release");
+                        let scancode = 0xE050;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                        let mut input = input_helper(scancode, flags);
+                        
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    }
+
+            } else if button == 52 {
+                    // D/RIGHT was contacted
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold right
+                        println!("Arrow Key Right Hold");
+                        let scancode = 0xE04D;
+                        let flags = KEYEVENTF_SCANCODE;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    } else {
+                        // Controller release right
+                        println!("Arrow Key Right Release");
+                        let scancode = 0xE04D;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    }
+
+            } else if button == 54 {
+                    // START was contacted
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold start (M)
+                        println!("Start hold (M)");
+                        let scancode = 0x32;
+                        let flags = KEYEVENTF_SCANCODE;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    } else {
+                        // Controller release start (Q)
+                        println!("Start release (M)");
+                        let scancode = 0x32;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    }
+            
+            } else if button == 55 {
+                    // B was contacted
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold B
+                        println!("R Hold");
+                        let scancode = 0x13;
+                        let flags = KEYEVENTF_SCANCODE;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    } else {
+                        // Controller release B
+                        println!("R Release");
+                        let scancode = 0x13;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                        let mut input = input_helper(scancode, flags);
+                        
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    }
+
+            } else if button == 56 {
+                    // A was contacted
+                    // Check if it was a release or hold
+
+                    if hold_or_release == 48 {
+                        // Controller hold A
+                        println!("E Hold");
+                        let scancode = 0x12;
+                        let flags = KEYEVENTF_SCANCODE;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    } else {
+                        // Controller release A
+                        println!("E Release");
+                        let scancode = 0x12;
+                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                        let mut input = input_helper(scancode, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
+                    }
+            }
         }
         // will consider another branch for combination inputs (two buttons at once) later if determined necessary
     };
