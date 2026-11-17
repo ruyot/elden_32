@@ -55,6 +55,7 @@ dependencies = [
  "serialport",
  "tokio",
  "tokio-serial",
+ "winapi",
  "winput",
 ]
 
