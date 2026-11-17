@@ -1,7 +1,7 @@
 use tokio_serial::SerialPortBuilderExt;
 use std::{error::Error};
 use winput::{Action, Button, Input};
-use winapi::{shared::basetsd::INT32, um::winuser::{self, INPUT, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE}};
+use winapi::{um::winuser::{self, INPUT, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE}};
 
 use crate::input::input_helper;
 
@@ -168,9 +168,9 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                     // Check if it was a release or hold
 
                     if hold_or_release == 48 {
-                        // Controller hold start (probably can be e)
+                        // Controller hold start (Q)
                         println!("Start hold");
-                        let scancode = 0x12;
+                        let scancode = 0x10;
                         let flags = KEYEVENTF_SCANCODE;
 
                         let mut input = input_helper(scancode, flags);
@@ -179,9 +179,9 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                             winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
                         }
                     } else {
-                        // Controller release start
+                        // Controller release start (Q)
                         println!("Start release");
-                        let scancode = 0x12;
+                        let scancode = 0x10;
                         let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
 
                         let mut input = input_helper(scancode, flags);
@@ -246,13 +246,28 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 }
 
 /*
-Single button presses seem to be of length 35 (array with 35 bytes) while simultaneous double button presses are 70
-Will at most usually only have two buttons being pressed at the same time at max
+Okay so this is what im thinking for the keybinds for each config 1 and 2
 
-So we could then make it so that we check at most a size of 70 and if the size is greater than 70 say 3 or 4 button presses at once we ignore
-or actually ig we would just ignore by default and the smashes shouldnt do anything depending on how the code is written
+config 1 (Attacking):
+UP - corresponds to W
+LEFT - corresponds to A
+DOWN - corresponds to S
+RIGHT - corresponds to D
+HOME - swaps configuration
+START - corresponds to Q
+B - corresponds to space
+A - corresponds to left click/light attack
 
-length also increases as time elapsed increases since the array has a timestamp embedded within it which is why the buffer size is larger than just 70 to account for fluctuation
+config 2 (Exploring):
+UP - corresponds to Arrow Key Up
+LEFT - Corresponds to Arrow Key Left
+DOWN - Corresponds to Arrow Key Down
+RIGHT - Corresponds to Arrow Key Right
+HOME - swaps configuration
+START - corresponds to M (open the map)
+B - corresponds to R (use item/heal) [idk if I should swap this with what start is in config 1, but I can get used to it so we'll see]
+A - corresponds to E (interact/select)
 
-the last byte is line feed LF and the second last is carriage return CR the input number combination is the 3 bytes after (or 1 byte after if its the home button)
+notice that there isnt space for jump, for the majority of bosses no jump should be fine. godfrey is an exception to this might need to change bindings there 
+either way gonna start with this and see how things go then change things as needed
 */
