@@ -25,21 +25,24 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
         let content = &buffer[..count];
             
         // The third last element is the number indicating whether the input is a hold or a release
-        let hold_or_release_i = count - 3;           
-            
+        let hold_release_i = count - 3;
+        
         // checking whether or not theres a semi colon allows us to differentiate the input from home (which is 5) or the other 7 buttons which are 1:0, 2:1, 2:0 etc
-        let semi_i = count - 4;
+        // checking based on whether or not theres a semi colon was causing issues due to multiple input presses happening at the sametime 
+        // during these multipress moments the serial port can contain more memory than the buffers pre-defined size 
+        // say the total memory is 90 and the buffer can store 76, a second message of 14 must come over
+        // the 14 byte message would not have a semicolon, by using a more deterministic filter like whether the value is 5 or not we can guarantee that home is only triggered when home is truly pressed
 
         // The fifth last element is the number indicating what button the input message is from
         let button_i = count - 5;
 
-        let hold_or_release = content[hold_or_release_i];
-        let semi = content[semi_i];    
+        let hold_or_release = content[hold_release_i];    
         let button = content[button_i];
         
-        if semi != 58 {
+        // The index for grabbing the value 5 from a home button input is the same as the one for grabbing the hold_or_release of all other inputs
+        // so we just compare with the hold_or_release value directly rather than creating a new variable to detect if home was pressed
+        if hold_or_release == 53 {
             // HOME was contacted
-
             if is_home == false {
                 is_home = true;
                 println!("Switched to configuration 2 (Exploring)")
