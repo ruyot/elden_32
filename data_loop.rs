@@ -366,6 +366,14 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                         unsafe {
                             winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
                         }
+                        
+                        // Send an escape key too
+                        let scancode_esc = 0x01;
+                        let input = input_helper(scancode_esc, flags);
+
+                        unsafe {
+                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                        }
                     } else {
                         // Controller release start (M)
                         println!("Start release (M)");
@@ -466,4 +474,8 @@ A - corresponds to E (interact/select)
 
 notice that there isnt space for jump, for the majority of bosses no jump should be fine. godfrey is an exception to this might need to change bindings there 
 either way gonna start with this and see how things go then change things as needed
+
+for escape which is the last key thats needed for the entire game to work, could we start a timer as soon as the user holds start on exploring mode, let it tick up 
+if the timer gets to 3 seconds we send the scancode for the escape key
+same goes the other way on release, we send an escape key scancode no matter what, if theres no reason for the the escape key release to be used the os will just ignore it
 */
