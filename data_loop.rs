@@ -1,7 +1,7 @@
 use tokio_serial::SerialPortBuilderExt;
 use std::{thread, error::Error, time::Duration};
 use winput::{Action, Button, Input};
-use winapi::um::winuser::{self, INPUT, KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE};
+use winapi::{shared::minwindef::INT, um::winuser::{self, INPUT, KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE}};
 
 use crate::input::input_helper;
 
@@ -20,8 +20,12 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
     // Boolean flag for whether or not were in settings so that the start button changes from M to X on explore mode (so that the game can be exited)
     let mut in_settings = false;
 
+    // Boolean flag for changing R (use item/heal) in the attacking configuration to jump (F)
+    let mut jump = false;
+
     // Sequence thats kept track to differentiate the user wanting "esc" or "enter" both extra keys 
     // "esc" corresponds to UP,UP,LEFT,RIGHT,DOWN while "enter" corresponds to UP,UP,RIGHT,LEFT,DOWN (in the exploring configuration, configuration 2)
+    // swapping R in config 1 to F which changes use item to jump requires sequence UP,UP,LEFT,RIGHT,UP
     let mut sequence = "";
 
     // Continuous loop where we read from the serial port that the esp32 is connected to and monitor incoming messages
@@ -42,6 +46,7 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                 // detecting home by sending an obscure character value of # which corresponds to 35 in ascii code
                 if is_home == false {
                     is_home = true;
+                    jump = false; // Whenever we swap to config 2 reset config 1 back to its default
                     println!("Switched to configuration 2 (Exploring)")
                 } else {
                     is_home = false;
@@ -173,26 +178,52 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                     // Check if it was a release or hold
 
                     if hold_or_release == 48 {
-                        // Controller hold start (R)
-                        println!("Start hold (R)");
-                        let scancode = 0x13;
-                        let flags = KEYEVENTF_SCANCODE;
+                        // check if the user requested for start to map to jump (F) instead of the default use item (R) 
+                        if jump == true {
+                            println!("Start hold (F)");
+                            let scancode = 0x21;
+                            let flags = KEYEVENTF_SCANCODE;
 
-                        let mut input = input_helper(scancode, flags);
+                            let mut input = input_helper(scancode, flags);
 
-                        unsafe {
-                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                            unsafe {
+                                winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                            }
+                        } else {
+                            // Controller hold start (R)
+                            println!("Start hold (R)");
+                            let scancode = 0x13;
+                            let flags = KEYEVENTF_SCANCODE;
+
+                            let mut input = input_helper(scancode, flags);
+
+                            unsafe {
+                                winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                            }
                         }
                     } else {
-                        // Controller release start (R)
-                        println!("Start release (R)");
-                        let scancode = 0x13;
-                        let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+                        // check if the user requested for start to map to jump (F) instead of the default use item (R)
+                        if jump == true {
+                            println!("Start release (F)");
+                            let scancode = 0x21;
+                            let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
 
-                        let mut input = input_helper(scancode, flags);
+                            let mut input = input_helper(scancode, flags);
 
-                        unsafe {
-                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                            unsafe {
+                                winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                            }
+                        } else {
+                            // Controller release start (R)
+                            println!("Start release (R)");
+                            let scancode = 0x13;
+                            let flags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+                            let mut input = input_helper(scancode, flags);
+
+                            unsafe {
+                                winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                            }
                         }
                     }
             
@@ -259,6 +290,10 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
                             sequence = "w"
                         } else if sequence == "w" {
                             sequence = "ww"
+                        } else if sequence == "ad" {
+                            // we've met the sequence requirement to change start in config 1 from use item (R) to jump (F)
+                            jump = true;
+                            sequence = ""
                         }
 
                         // Controller hold forward
@@ -554,7 +589,6 @@ HOME - swaps configuration
 START - corresponds to M (open the map)
 B - corresponds to R (use item/heal) [idk if I should swap this with what start is in config 1, but I can get used to it so we'll see]
 A - corresponds to E (interact/select)
-
 notice that there isnt space for jump, for the majority of bosses no jump should be fine. godfrey is an exception to this might need to change bindings there 
 either way gonna start with this and see how things go then change things as needed
 */
