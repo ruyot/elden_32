@@ -7,6 +7,7 @@ short youtube vid of first mini boss (embedded in image or here: https://www.you
 ## This is what the full board looks like with the ESP32 and the 8 buttons (this is the controller)
 ![controller](controller.png)
 
+```
 There are 18 mandatory buttons that need to be mapped across the entire game to mouse and keyboard inputs
 The keyboard keys for these buttons are:
 W - (moving forward)
@@ -56,3 +57,4 @@ HOME                (swaps config)    (swaps config)
 START               R                 M
 B                   SPACE             Q
 A                   LEFT CLICK        E
+```
