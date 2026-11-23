@@ -17,6 +17,9 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
     // Boolean flag for changing configurations from "attacking" to "exploring" 
     let mut is_home = false;
 
+    // Boolean flag for whether or not were in settings so that the start button changes from M to X on explore mode (so that the game can be exited)
+    let mut in_settings = false;
+
     // Sequence thats kept track to differentiate the user wanting "esc" or "enter" both extra keys 
     // "esc" corresponds to UP,UP,LEFT,RIGHT,DOWN while "enter" corresponds to UP,UP,RIGHT,LEFT,DOWN (in the exploring configuration, configuration 2)
     let mut sequence = "";
@@ -248,15 +251,16 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
             if button == 49 {
                     // W/UP was contacted 
 
-                    // Build the beginning of the sequence since the user pressed the up arrow
-                    if sequence == "" {
-                        sequence = "w"
-                    } else if sequence == "w" {
-                        sequence = "ww"
-                    }
-
                     // Check if it was a release or hold
                     if hold_or_release == 48 {
+                        
+                        // Build the beginning of the sequence since the user pressed the up arrow
+                        if sequence == "" {
+                            sequence = "w"
+                        } else if sequence == "w" {
+                            sequence = "ww"
+                        }
+
                         // Controller hold forward
                         println!("Arrow Key Up Hold");
                         let scancode = 0xE048;
@@ -282,16 +286,17 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
             } else if button == 50 {
                     // A/LEFT was contacted
-                    
-                    // Build the center of the sequence since the user pressed the left arrow
-                    if sequence == "ww" {
-                        sequence = "a"
-                    } else if sequence == "d" {
-                        sequence = "da"
-                    }
 
                     // Check if it was a release or hold
                     if hold_or_release == 48 {
+
+                        // Build the center of the sequence since the user pressed the left arrow
+                        if sequence == "ww" {
+                            sequence = "a"
+                        } else if sequence == "d" {
+                            sequence = "da"
+                        }
+
                         // Controller hold left
                         println!("Arrow Key Left Hold");
                         let scancode = 0xE04B;
@@ -331,12 +336,13 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
                         unsafe {
                             winuser::SendInput(1, input_hold.as_mut_ptr(), size_of::<INPUT>() as i32);
-                            // sending release right after is too fast for the game and it detects as no input so we wait a second
-                            thread::sleep(Duration::from_secs(1));
+                            // sending release right after is too fast for the game and it detects as no input so we delay for the next frame 6000ms/60(fps) = 16.67ms
+                            thread::sleep(Duration::from_millis(16));
                             winuser::SendInput(1, input_release.as_mut_ptr(), size_of::<INPUT>() as i32);
                         }
                         
                         sequence = "";
+                        if in_settings == false { in_settings = true } else { in_settings = false}
                     } else if sequence == "da" {
                         // enter
                         println!("Enter");
@@ -349,16 +355,16 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
                         unsafe {
                             winuser::SendInput(1, input_hold.as_mut_ptr(), size_of::<INPUT>() as i32);
-                            // sending release right after is too fast for the game and it detects as no input so we wait a second
-                            thread::sleep(Duration::from_secs(1));
+                            // sending release right after is too fast for the game and it detects as no input so we delay for the next frame 6000ms/60(fps) = 16.67ms
+                            thread::sleep(Duration::from_millis(16));
                             winuser::SendInput(1, input_release.as_mut_ptr(), size_of::<INPUT>() as i32);
                         }
 
                         sequence = "";
                     }
                     
-                    // Check if it was a release or hold
-                    if hold_or_release == 48 {
+                    // Check if it was a release or hold (unrelated to the sequence, standard down)
+                    else if hold_or_release == 48 {
                         // Controller hold down
                         println!("Arrow Key Down Hold");
                         let scancode = 0xE050;
@@ -385,15 +391,16 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
             } else if button == 52 {
                     // D/RIGHT was contacted
 
-                    // Build the center of the sequence since right was contacted
-                    if sequence == "ww" {
-                        sequence = "d";
-                    } else if sequence == "a" {
-                        sequence = "ad"
-                    }
-
                     // Check if it was a release or hold
                     if hold_or_release == 48 {
+                        
+                        // Build the center of the sequence since right was contacted
+                        if sequence == "ww" {
+                            sequence = "d";
+                        } else if sequence == "a" {
+                            sequence = "ad"
+                        }
+
                         // Controller hold right
                         println!("Arrow Key Right Hold");
                         let scancode = 0xE04D;
@@ -419,18 +426,36 @@ pub async fn data_loop_helper() -> Result<(), Box<dyn Error>> {
 
             } else if button == 54 {
                     // START was contacted
+
                     // Check if it was a release or hold
-
                     if hold_or_release == 48 {
-                        // Controller hold start (M)
-                        println!("Start hold (M)");
-                        let scancode = 0x32;
-                        let flags = KEYEVENTF_SCANCODE;
+                        // when in the settings menu, start becomes x to allow for exiting the game
+                        if in_settings {
+                            println!("Start (X)");
+                            let scancode = 0x2D;
+                            let flags_hold = KEYEVENTF_SCANCODE;
+                            let flags_release = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
 
-                        let mut input = input_helper(scancode, flags);
+                            let mut input_hold = input_helper(scancode, flags_hold);
+                            let mut input_release = input_helper(scancode, flags_release);
 
-                        unsafe {
-                            winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                            unsafe {
+                                winuser::SendInput(1, input_hold.as_mut_ptr(), size_of::<INPUT>() as i32);
+                                // sending release right after is too fast for the game and it detects as no input so we delay for the next frame 6000ms/60(fps) = 16.67ms
+                                thread::sleep(Duration::from_millis(16));
+                                winuser::SendInput(1, input_release.as_mut_ptr(), size_of::<INPUT>() as i32);
+                            }
+                        } else {
+                            // Controller hold start (M)
+                            println!("Start hold (M)");
+                            let scancode = 0x32;
+                            let flags = KEYEVENTF_SCANCODE;
+
+                            let mut input = input_helper(scancode, flags);
+
+                            unsafe {
+                                winuser::SendInput(1, input.as_mut_ptr(), size_of::<INPUT>() as i32);
+                            }       
                         }
                     } else {
                         // Controller release start (M)
@@ -532,14 +557,4 @@ A - corresponds to E (interact/select)
 
 notice that there isnt space for jump, for the majority of bosses no jump should be fine. godfrey is an exception to this might need to change bindings there 
 either way gonna start with this and see how things go then change things as needed
-
-for escape which is mandatory as its needed to close dialog and training options as well as open the equipement and inventory pages
-im thinking of just having the button that opens the map (start) on the explore configuration also send a scancode for esc
-this (in theory) should result in both the map and the options screen opening one after another
-but by having the release of escape bound to another button thats independent from both (Q) in explore mode
-you can press Q to get rid of escape if you just want the map
-and not press Q if you want to stay in the escaped option screen
-
-the game (in theory) should ignore "ghost" release scancodes when Q is pressed normally (eg setting the camera on a target)
-since esc isnt being pressed at that point
 */
